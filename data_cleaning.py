@@ -42,7 +42,7 @@ def format_education(data):
 def format_vehicle_class(data):
     if data is not None and isinstance(data, pd.DataFrame):
         if 'Vehicle_Class' in data.columns:
-            data['Vehicle_Class'] = data['Vehicle_Class'].replace({'Luxury SUV': 'Luxury', 'Luxury Car': 'Luxury'})
+            data['Vehicle_Class'] = data['Vehicle_Class'].replace({'Sports Car': 'Luxury', 'Luxury SUV': 'Luxury', 'Luxury Car': 'Luxury'})
     return data  
 
 def format_income(data):
@@ -55,6 +55,42 @@ def format_income(data):
         print("Error: 'data' es None o no es un DataFrame.")
     return data
 
+def format_column_names(data):
+    if data is not None and isinstance(data, pd.DataFrame):
+        # Reemplazar espacios por guiones bajos y poner en mayúscula la primera letra de cada palabra
+        data.columns = [col.strip().replace(' ', '_').title().replace(' ', '_') for col in data.columns]
+    else:
+        print("Error: 'data' es None o no es un DataFrame.")
+    return data
+
+def format_number_of_complaints(data):
+    if data is not None and isinstance(data, pd.DataFrame):
+        if 'Number of Open Complaints' in data.columns:
+            # Reemplazar palabras por números
+            data['Number of Open Complaints'] = data['Number of Open Complaints'].str.replace('One', '1')
+            data['Number of Open Complaints'] = data['Number of Open Complaints'].str.replace('Two', '2')
+            data['Number of Open Complaints'] = data['Number of Open Complaints'].str.replace('None', '0')
+            
+            # Separar los valores con "/" y sumar los componentes si existen
+            def sum_complaints(complaint):
+                if isinstance(complaint, str):
+                    parts = complaint.split('/')
+                    try:
+                        return sum([int(part) for part in parts if part.isdigit()])
+                    except ValueError:
+                        return 0  # Si hay error, devolver 0
+                return complaint  # Devolver tal cual si no es string
+
+            data['Number of Open Complaints'] = data['Number of Open Complaints'].apply(sum_complaints)
+    return data
+
+def format_customer_lifetime_value(data):
+    if data is not None and isinstance(data, pd.DataFrame):
+        if 'Customer-Lifetime-Value' in data.columns:
+            # Eliminar el símbolo % y convertir a float
+            data['Customer-Lifetime-Value'] = data['Customer-Lifetime-Value'].str.replace('%', '', regex=False).astype(float)
+    return data
+
 def clean_data(df):
     df = handle_missing_values(df)
     df = handle_duplicates(df)
@@ -64,4 +100,7 @@ def clean_data(df):
     df = format_education(df)
     df = format_vehicle_class(df)
     df = format_income(df)
+    df = format_column_names(df)
+    df = format_number_of_complaints(df)
+    df = format_customer_lifetime_value(df)
     return df
