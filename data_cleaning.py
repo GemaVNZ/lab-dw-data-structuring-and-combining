@@ -48,7 +48,7 @@ def format_vehicle_class(data):
 def format_income(data):
     if data is not None and isinstance(data, pd.DataFrame):
         if 'Income' in data.columns:
-            data['Income'] = data['Income'].astype(str).str.replace('$', '', regex=False)
+            data['Income'] = data['Income'].astype(str).str.replace(',', '').str.replace('$', '', regex=False).astype(float)
         else:
             print("Error: La columna 'Income' no se encuentra en el DataFrame.")
     else:
